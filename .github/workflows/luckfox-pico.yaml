@@ -9,6 +9,14 @@ on:
 jobs:
   build-sdcard:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [rv1103, rv1106]
+        include:
+          - target: rv1103
+            lunch_option: 1
+          - target: rv1106
+            lunch_option: 4
 
     container:
       image: debian:bookworm
@@ -27,16 +35,18 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Run build steps
+      - name: Run build steps (${{ matrix.target }})
         shell: bash
         run: |
           set -e
-          echo -e "1\n0\n0" | ./build.sh lunch
+
+          echo -e "${{ matrix.lunch_option }}\n0\n0" | ./build.sh lunch
+
           ./build.sh media
           ./build.sh
           ./finish-ohd.sh
 
-      - name: Compress sdcard.img
+      - name: Compress sdcard.img (${{ matrix.target }})
         run: |
           set -e
           cd output/genimage
@@ -47,11 +57,13 @@ jobs:
             exit 1
           fi
 
+          # Compress and rename per target (rv1103 / rv1106)
           xz -T0 -9 -f sdcard.img
+          mv sdcard.img.xz sdcard-${{ matrix.target }}.img.xz
 
-      - name: Upload image artifact
+      - name: Upload image artifact (${{ matrix.target }})
         uses: actions/upload-artifact@v4
         with:
-          name: sdcard-img
-          path: output/genimage/sdcard.img.xz
+          name: sdcard-img-${{ matrix.target }}
+          path: output/genimage/sdcard-${{ matrix.target }}.img.xz
           if-no-files-found: error
