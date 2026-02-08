@@ -1461,16 +1461,16 @@ ohd_init() {
 	SWP_DEV=/dev/block/by-name/swap
 
 	#create mountpoints
-	[ -d /config ] || mkdir -p /config
+	[ -d /Config ] || mkdir -p /Config
 	[ -d /Videos ] || mkdir -p /Videos
 
-	if [ -b "$CFG_DEV" ] && ! mountpoint -q /config; then
-	    mount -t auto "$CFG_DEV" /config 2>/dev/null || true
+	if [ -b "$CFG_DEV" ] && ! mountpoint -q /Config; then
+	    mount -t auto "$CFG_DEV" /Config 2>/dev/null || true
 	fi
 
 	FIRST_BOOT=0
-	if mountpoint -q /config; then
-	    [ -e /config/.config ] || FIRST_BOOT=1
+	if mountpoint -q /Config; then
+	    [ -e /Config/.config ] || FIRST_BOOT=1
 	fi
 
         mkswap -L SWAP "$SWP_DEV" || true
@@ -1498,7 +1498,7 @@ ohd_init() {
 	    fi
 
 	    # Drop the first-boot marker
-	    touch /config/.config
+	    touch /Config/.config
 	    #reboot
 	fi
 
